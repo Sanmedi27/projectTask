@@ -1,7 +1,9 @@
 package co.com.poli.taller.projecttaskservice.controller;
 
+import co.com.poli.taller.projecttaskservice.client.ProjectClient;
 import co.com.poli.taller.projecttaskservice.domain.ProjectTask;
 import co.com.poli.taller.projecttaskservice.model.ErrorMessage;
+import co.com.poli.taller.projecttaskservice.model.Project;
 import co.com.poli.taller.projecttaskservice.service.ProjectTaskService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,9 +23,11 @@ import java.util.stream.Collectors;
 @RequestMapping(value = "/task")
 public class ProjectTaskController {
     final ProjectTaskService projectTaskService;
+    final ProjectClient projectClient;
 
-    public ProjectTaskController(ProjectTaskService projectTaskService) {
+    public ProjectTaskController(ProjectTaskService projectTaskService, ProjectClient projectClient) {
         this.projectTaskService = projectTaskService;
+        this.projectClient = projectClient;
     }
 
     @GetMapping
@@ -33,6 +37,18 @@ public class ProjectTaskController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(projectTasks);
+    }
+
+    @GetMapping(value = "/project/{project_identifier}")
+    public ResponseEntity<List<ProjectTask>> getTaskByProjectIdentifier(@PathVariable String project_identifier) {
+        Project project = projectClient.getProjectByProjectIdentifier(project_identifier).getBody();
+        if (project == null) {
+            return ResponseEntity.noContent().build();
+        }
+        List<ProjectTask> projectTaskList = projectTaskService.findProjectTaskAll().stream()
+                .filter(task -> task.getProjectIdentifier() == project_identifier)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(projectTaskList);
     }
 
     @PostMapping
