@@ -1,8 +1,8 @@
 spring:
   application:
-    name: service-projecttask
+    name: projecttask-service
   cloud:
     config:
       uri: http://localhost:9090
-      name: ${CONFIG_USER}
-      password: ${CONFIG_PASSWORD}
+      username: admin
+      password: admin1234
